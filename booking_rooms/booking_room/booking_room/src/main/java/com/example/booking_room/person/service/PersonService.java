@@ -1,9 +1,9 @@
-package com.example.booking_.person.service;
+package com.example.booking_room.person.service;
 
-import com.example.booking_.person.Person;
-import com.example.booking_.person.RegisterPersonRequest;
-import com.example.booking_.person.UpdatePersonRequest;
-import com.example.booking_.person.repository.PersonRepository;
+import com.example.booking_room.person.Person;
+import com.example.booking_room.person.RegisterPersonRequest;
+import com.example.booking_room.person.UpdatePersonRequest;
+import com.example.booking_room.person.repository.PersonRepository;
 import lombok.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

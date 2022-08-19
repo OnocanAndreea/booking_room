@@ -1,9 +1,9 @@
-package com.example.booking_.person.controller;
+package com.example.booking_room.person.controller;
 
-import com.example.booking_.person.Person;
-import com.example.booking_.person.RegisterPersonRequest;
-import com.example.booking_.person.UpdatePersonRequest;
-import com.example.booking_.person.service.PersonService;
+import com.example.booking_room.person.Person;
+import com.example.booking_room.person.RegisterPersonRequest;
+import com.example.booking_room.person.UpdatePersonRequest;
+import com.example.booking_room.person.service.PersonService;
 import lombok.NonNull;
 
 import org.springframework.http.HttpStatus;
