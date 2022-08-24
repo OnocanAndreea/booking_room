@@ -9,7 +9,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Room")
+@Table(name = "room")
 public class RoomEntity{
 
         @Id
@@ -19,8 +19,8 @@ public class RoomEntity{
         @Column(name = "room_id")
         public Integer roomID;
 
-        @Column(name = "number_of_sits")
-        public Integer numberOfSits;
+        @Column(name = "number_of_seats")
+        public Integer numberOfSeats;
 
         @Column(name = "room_address_id")
         public Integer roomAddressID;

@@ -9,14 +9,14 @@ import org.springframework.lang.Nullable;
 @Value
 public class  Person {
     //@NonNull // this way it gives an error: personID is marked non-null but is null
-    @Nullable   // I tried with Nullable, but it gives another error
-            Integer personID;
+    @Nullable
+    Integer personID;
     @NonNull
     String firstName;
     @NonNull
     String lastName;
     @NonNull
-    String phoneNumber;
+    Integer phoneNumber;
     @NonNull
     String email;
     @NonNull

@@ -1,26 +1,22 @@
-package com.example.booking_;
+package com.example.booking_room;
 
-import com.example.booking_.person.UpdatePersonRequest;
-import com.example.booking_.person.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.EventListener;
 
 @SpringBootApplication
-public class BookingApplication {
+public class BookingRoomApplication {
     @Autowired
     private ApplicationContext context;
 
     public static void main(String[] args) {
-        SpringApplication.run(BookingApplication.class, args);
+        SpringApplication.run(BookingRoomApplication.class, args);
     }
 
 //    @EventListener(ApplicationReadyEvent.class)
     public void doSomethingAfterStartup() {
-//        final PersonService personService = context.getBean(PersonService.class);
+//        final PersonServicejhi personService = context.getBean(PersonServicejhi.class);
      /* final RegisterPersonRequest registerPersonRequest = RegisterPersonRequest.builder()
                 .email("ggg.kkk@email.com")
                 .firstName("firstName7")

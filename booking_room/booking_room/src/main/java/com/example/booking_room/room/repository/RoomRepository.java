@@ -1,7 +1,6 @@
 package com.example.booking_room.room.repository;
 
-
-import com.example.booking_room.room.service.;
+import com.example.booking_room.room.Room;
 import lombok.NonNull;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -31,7 +30,7 @@ public class RoomRepository {
     @NonNull
 
     public Room create(@NonNull final Room room){ // must return a Room
-        final Room roomEntity = toEntity(room);
+        final RoomEntity roomEntity = toEntity(room);
 
         Transaction transaction = null;
         try(Session session = hibernateFactory.openSession()){
@@ -54,7 +53,7 @@ public class RoomRepository {
             if (transaction != null){
                 transaction.rollback();
             }
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 
@@ -143,11 +142,11 @@ public class RoomRepository {
     public @NonNull Room update(@NonNull final Room room) // must return a Person?
     {
         System.out.println("in update got person:" + room);
-        // todo: map Person to PersonEntity
-        final RoomEntity roomEntity = toEntity(room);
-        System.out.println("in update personentity:" + roomEntity);
+        // todo: map Person to RoomEntity
+        final @NonNull RoomEntity roomEntity = toEntity(room);
+        System.out.println("in update roomentity:" + roomEntity);
 
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
+        // todo: use Hibernate EntityManager or Session to persist the entity in DB
         Session session = null;
         Transaction transaction = null;
         try {
@@ -176,17 +175,17 @@ public class RoomRepository {
     @NonNull
     public Room fromEntity(@NonNull final RoomEntity roomEntity){
         return Room.builder()
-                .roomID(RoomEntity.getRoomID())
-                .numberOfSits(RoomEntity.getNumberOfSits())
-                .roomAddressID(RoomEntity.getRoomAddressID())
-                .type(RoomEntity.getType())
+                .roomID(roomEntity.getRoomID())
+                .numberOfSeats(roomEntity.getNumberOfSeats())
+                .roomAddressID(roomEntity.getRoomAddressID())
+                .type(roomEntity.getType())
                 .build();
     }
 
-    public  static Room toEntity(@NonNull final Room room){
-        return Room.builder()
+    public  static RoomEntity toEntity(@NonNull final Room room){
+        return RoomEntity.builder()
                 .roomID(room.getRoomID())
-                .numberOfSits(room.getNumberOfSits())
+                .numberOfSeats(room.getNumberOfSeats())
                 .roomAddressID(room.getRoomAddressID())
                 .type(room.getType())
                 .build();

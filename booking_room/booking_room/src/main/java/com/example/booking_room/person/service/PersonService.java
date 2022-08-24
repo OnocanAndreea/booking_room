@@ -3,12 +3,15 @@ package com.example.booking_room.person.service;
 import com.example.booking_room.person.Person;
 import com.example.booking_room.person.RegisterPersonRequest;
 import com.example.booking_room.person.UpdatePersonRequest;
+import com.example.booking_room.person.controller.data.JsonGetPersonListResponse;
+import com.example.booking_room.person.controller.data.JsonPersonResponse;
 import com.example.booking_room.person.repository.PersonRepository;
+import lombok.Builder;
 import lombok.NonNull;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PersonService {
@@ -20,8 +23,8 @@ public class PersonService {
         this.personRepository = personRepository;
     }
 
-    public Person registerPerson(@NonNull final RegisterPersonRequest registerPersonRequest) { // must return a person ?
-        //todo map registerPersonRequest to Person
+    public JsonPersonResponse registerPerson(@NonNull final RegisterPersonRequest registerPersonRequest) { // must return a JsonPerson
+
         final Person person = Person.builder()
                 .firstName(registerPersonRequest.getFirstName())
                 .lastName(registerPersonRequest.getLastName())
@@ -33,12 +36,14 @@ public class PersonService {
         final Person registeredPerson = personRepository.create(person);
 
 
-        return person;
+        return JsonPersonResponse.toJson(registeredPerson);
     }
 
-    public Person getPerson(Integer personID) {
+    public JsonPersonResponse getPerson(Integer personID) {
+
         try {
-            return personRepository.readByID(personID);
+            Person person = personRepository.readByID(personID);
+            return JsonPersonResponse.toJson(person);
         } catch (Exception e) {
             throw new RuntimeException("Person with id:" + personID + " not found!");
         }
@@ -48,13 +53,13 @@ public class PersonService {
 
         try {
             personRepository.deleteByID(personID);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Person with :" + personID + "not found");
         }
 
     }
 
-    public Person updatePerson(@NonNull final Integer personID, @NonNull final UpdatePersonRequest updatePersonRequest) {
+    public JsonPersonResponse updatePerson(@NonNull final Integer personID, @NonNull final UpdatePersonRequest updatePersonRequest) {
         System.out.println(personID);
         // o problema este, ca desi eu am sters din db de exemplu un person, daca i-am dat idul la update person
         // si numai de exemplu la firstname ceva, tot mi-o luat valoriile vechi de la lastname etc,
@@ -97,28 +102,38 @@ public class PersonService {
 
         final Person updatedPerson = personUpdate.build();
 
-        final Person updatedPersonResp = personRepository.update(updatedPerson);
+        final Person updatedPersonResponse = personRepository.update(updatedPerson);
         System.out.println("updatedPerson" + updatedPerson);
 
-        return updatedPerson;
+        return JsonPersonResponse.toJson(updatedPersonResponse);
     }
 
-    public ResponseEntity<?> getAllPersons() {
-        List<Person> personList = personRepository.readAll();
-        for (Person person : personList) {
-            System.out.println("PersonID: " + person.getPersonID() + " "
-                    + "FirstName:" + person.getFirstName() + " "
-                    + "LastName:" + person.getLastName() + " "
-                    + "Email:" + person.getEmail() + " "
-                    + "Phonenumber:" + person.getPhoneNumber() + " "
-                    + "Role:" + person.getRole());
+    public JsonGetPersonListResponse getAllPersons() {
+
+        //for (Person person : personList) {
+        //    System.out.println("PersonID: " + person.getPersonID() + " "
+        //             + "FirstName:" + person.getFirstName() + " "
+        //             + "LastName:" + person.getLastName() + " "
+        //             + "Email:" + person.getEmail() + " "
+        //              + "PhoneNumber:" + person.getPhoneNumber() + " "
+        //             + "Role:" + person.getRole());
+        //  }
+
+        try {
+            List<Person> personList = personRepository.readAll();
+            return JsonGetPersonListResponse.builder().persons(personList
+                    .stream()
+                    .map(person -> JsonPersonResponse.toJson(person))
+                    .collect(Collectors.toList()))
+                    .build();
+            // not working
+            /*personList.builder().persons(personList //am trans un for intr un stream
+                    .stream()
+                    .map(JsonPersonResponse::toJson)//map ul imi ia elem din lista de pers si le transf intr o jsonlista
+                    .collect(Collectors.toList())).build();*/
+        } catch (Exception e) {
+            throw new RuntimeException("we can not show you the persons from the list");
         }
 
-        try{
-            personRepository.readAll();
-        }catch (Exception e){
-            throw new RuntimeException("Person with:" + personList +"not found");
-        }
-        return null;
     }
 }

@@ -1,4 +1,4 @@
-package com.example.booking_room.room.service;
+package com.example.booking_room.room;
 
 import lombok.Builder;
 import lombok.NonNull;
@@ -12,10 +12,12 @@ public class RegisterRoomRequest {
     @Nullable
     Integer roomID;
     @NonNull
-    Integer numberOfSits;
+    Integer numberOfSeats;
     @NonNull
     Integer roomAddressID;
     @NonNull
     String type;
+    @NonNull
+    Integer personID;
 }
 

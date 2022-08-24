@@ -1,16 +1,14 @@
 package com.example.booking_room.person.controller;
 
-import com.example.booking_room.person.Person;
 import com.example.booking_room.person.RegisterPersonRequest;
 import com.example.booking_room.person.UpdatePersonRequest;
+import com.example.booking_room.person.controller.data.JsonGetPersonListResponse;
+import com.example.booking_room.person.controller.data.JsonPersonResponse;
 import com.example.booking_room.person.service.PersonService;
 import lombok.NonNull;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 //endpoint by default
@@ -34,9 +32,9 @@ public class PersonController {
     @RequestMapping(value = "/persons", method = RequestMethod.GET)
     public ResponseEntity<?> getAll() {
         try {
-            personService.getAllPersons();
-            return ResponseEntity.ok("the list of persons");
-        }catch (Exception e){
+           JsonGetPersonListResponse jsonGetPersonListResponse = personService.getAllPersons();
+            return ResponseEntity.ok(jsonGetPersonListResponse);
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body((e.getMessage()));
         }
@@ -46,8 +44,8 @@ public class PersonController {
     @GetMapping(value = "/{personID}")
     public ResponseEntity<?> getById(@PathVariable Integer personID) {
         try {
-            Person person = personService.getPerson(personID);
-            return ResponseEntity.ok(person);
+            JsonPersonResponse jsonPersonResponse = personService.getPerson(personID);
+            return ResponseEntity.ok(jsonPersonResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());
@@ -68,10 +66,16 @@ public class PersonController {
 
     // works
     @RequestMapping(method = RequestMethod.POST)
-    public Person add(@RequestBody RegisterPersonRequest registerPersonRequest) { // todo resp entity 200
-        System.out.println("New person created: " + registerPersonRequest);
-         personService.registerPerson(registerPersonRequest);
-        return null;
+    public ResponseEntity<?> add(@RequestBody RegisterPersonRequest registerPersonRequest) { // todo resp entity 200
+
+        try {
+            JsonPersonResponse jsonPersonResponse = personService.registerPerson(registerPersonRequest);
+            return ResponseEntity.ok(jsonPersonResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body((e.getMessage()));
+        }
+
     }
 
     // this works
@@ -79,7 +83,7 @@ public class PersonController {
     public ResponseEntity<?> update(@RequestBody UpdatePersonRequest updatePersonRequest, @PathVariable Integer personID) {
         System.out.println("Person with personId:" + personID + " to update");
         try {
-            final Person updatedPerson = personService.updatePerson(personID, updatePersonRequest);
+            final JsonPersonResponse updatedPerson = personService.updatePerson(personID, updatePersonRequest);
             return ResponseEntity.ok(updatedPerson);
         } catch (Exception exception) {
             return ResponseEntity

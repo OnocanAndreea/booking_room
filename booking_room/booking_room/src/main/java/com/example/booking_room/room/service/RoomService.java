@@ -1,33 +1,50 @@
 package com.example.booking_room.room.service;
 
 
-
 import com.example.booking_room.person.Person;
-import com.example.booking_room.person.RegisterPersonRequest;
-import com.example.booking_room.person.UpdatePersonRequest;
 import com.example.booking_room.person.repository.PersonRepository;
+import com.example.booking_room.room.RegisterRoomRequest;
+import com.example.booking_room.room.Room;
+import com.example.booking_room.room.UpdateRoomRequest;
+import com.example.booking_room.room.controller.data.JsonGetRoomListResponse;
+import com.example.booking_room.room.controller.data.JsonRoomResponse;
 import com.example.booking_room.room.repository.RoomRepository;
 import lombok.NonNull;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RoomService {
 
     @NonNull
     private final RoomRepository roomRepository;
+    @NonNull
+    private final PersonRepository personRepository;
 
-    public RoomService(@NonNull RoomRepository roomRepository) {
+    public RoomService(@NonNull RoomRepository roomRepository, @NonNull PersonRepository personRepository) {
         this.roomRepository = roomRepository;
+        this.personRepository=personRepository;
     }
 
-    public Room registerRoom (@NonNull final RegisterRoomRequest registerRoomRequest) { // must return a person ?
-        //todo map registerRoomRequest to room
+
+    public JsonRoomResponse registerRoom(@NonNull final RegisterRoomRequest registerRoomRequest,@NonNull final Integer personID) { // must return a JsonRoomResponse
+        //trebuie sa adauge o pers cu ID existent o camera, verific daca exista pers , si daca are rolul ca admin
+
+        Person person = personRepository.readByID(personID);
+
+        if (person == null) { //here throw exception
+            throw new RuntimeException("The person with id: " + personID + " doesn't exist.");
+        }
+        String role = person.getRole();
+
+        if (!role.equals("admin")){
+            throw new RuntimeException("this person" + personID + " can't add a room");
+        }
+
         final Room room = Room.builder()
-                .roomID(registerRoomRequest.getRoomID())
-                .numberOfSits(registerRoomRequest.getNumberOfSits())
+                .numberOfSeats(registerRoomRequest.getNumberOfSeats())
                 .roomAddressID(registerRoomRequest.getRoomAddressID())
                 .type(registerRoomRequest.getType())
                 .build();
@@ -35,12 +52,13 @@ public class RoomService {
         final Room registeredRoom = roomRepository.create(room);
 
 
-        return room;
+        return JsonRoomResponse.toJson(registeredRoom);
     }
 
-    public Room getRoom(Integer roomID) {
+    public JsonRoomResponse getRoom(Integer roomID) {
         try {
-            return roomID.readByID(roomID);
+            Room room = roomRepository.readByID(roomID);
+            return JsonRoomResponse.toJson(room);
         } catch (Exception e) {
             throw new RuntimeException("Room with id:" + roomID + " not found!");
         }
@@ -50,19 +68,17 @@ public class RoomService {
 
         try {
             roomRepository.deleteByID(roomID);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Room with :" + roomID + "not found");
         }
 
     }
 
-    public Room updateRoom(@NonNull final Integer roomID, @NonNull final UpdateRoomRequest updatePersonRequest) {
+    public JsonRoomResponse updateRoom(@NonNull final Integer roomID, @NonNull final UpdateRoomRequest updateRoomRequest) {
         System.out.println(roomID);
-        // o problema este, ca desi eu am sters din db de exemplu un person, daca i-am dat idul la update person
-        // si numai de exemplu la firstname ceva, tot mi-o luat valoriile vechi de la lastname etc,
-        // adica mi-o dat update la ce am sters deja
 
         final Room existingRoom = roomRepository.readByID(roomID);
+
 
         if (existingRoom == null) { //here throw exception
             throw new RuntimeException("The room with id: " + roomID + " doesn't exist. Please register a request to create a new person");
@@ -70,58 +86,62 @@ public class RoomService {
 
         final Room.RoomBuilder roomUpdate = Room.builder();
         roomUpdate.roomID(roomID);
-        if (UpdateRoomRequest.getroomID() != null) {
-            personUpdate.firstName(updatePersonRequest.getFirstName());
+        if (updateRoomRequest.getRoomID() != null) {
+            roomUpdate.roomID(updateRoomRequest.getRoomID());
         } else {
-            personUpdate.firstName(existingPerson.getFirstName());
-            System.out.println("FirstName in person service:" + existingPerson.getFirstName());
+            roomUpdate.roomID(existingRoom.getRoomID());
+            System.out.println(" Room ID:" + existingRoom.getRoomID());
         }
-        if (updatePersonRequest.getLastName() != null) {
-            personUpdate.lastName(updatePersonRequest.getLastName());
+        if (updateRoomRequest.getNumberOfSeats() != null) {
+            roomUpdate.numberOfSeats(updateRoomRequest.getNumberOfSeats());
         } else {
-            personUpdate.lastName(existingPerson.getLastName());
+            roomUpdate.numberOfSeats(existingRoom.getNumberOfSeats());
         }
-        if (updatePersonRequest.getEmail() != null) {
-            personUpdate.email(updatePersonRequest.getEmail());
+        if (updateRoomRequest.getRoomAddressID() != null) {
+            roomUpdate.roomAddressID(updateRoomRequest.getRoomAddressID());
         } else {
-            personUpdate.email(existingPerson.getEmail());
+            roomUpdate.roomAddressID(existingRoom.getRoomAddressID());
         }
-        if (updatePersonRequest.getPhoneNumber() != null) {
-            personUpdate.phoneNumber(updatePersonRequest.getPhoneNumber());
+        if (updateRoomRequest.getType() != null) {
+            roomUpdate.type(updateRoomRequest.getType());
         } else {
-            personUpdate.phoneNumber(existingPerson.getPhoneNumber());
-        }
-        if (updatePersonRequest.getRole() != null) {
-            personUpdate.role(updatePersonRequest.getRole());
-        } else {
-            personUpdate.role(existingPerson.getRole());
+            roomUpdate.type(existingRoom.getType());
         }
 
-        final Person updatedPerson = personUpdate.build();
+        final Room updatedRoom = roomUpdate.build();
 
-        final Person updatedPersonResp = personRepository.update(updatedPerson);
-        System.out.println("updatedPerson" + updatedPerson);
+        final Room updatedRoomResp = roomRepository.update(updatedRoom);
+        System.out.println("updatedRoom" + updatedRoom);
 
-        return updatedPerson;
+        return JsonRoomResponse.toJson(updatedRoomResp);
     }
 
-    public ResponseEntity<?> getAllPersons() {
-        List<Person> personList = personRepository.readAll();
-        for (Person person : personList) {
-            System.out.println("PersonID: " + person.getPersonID() + " "
-                    + "FirstName:" + person.getFirstName() + " "
-                    + "LastName:" + person.getLastName() + " "
-                    + "Email:" + person.getEmail() + " "
-                    + "Phonenumber:" + person.getPhoneNumber() + " "
-                    + "Role:" + person.getRole());
-        }
+    public JsonGetRoomListResponse getAllRooms() {
+        //for (Room room : roomList) {
+        //     System.out.println("RoomID: " + room.getRoomID() + " "
+        //             + "NumberOfSeats:" + room.getNumberOfSeats() + " "
+        //             + "RoomAddressID:" + room.getRoomAddressID() + " "
+        //             + "Type:" + room.getType() + " ");
+        // }
+        //roomList.
+        //        forEach(room -> System.out.println("RoomID: " + room.getRoomID() + " "
+        //                + "NumberOfSeats:" + room.getNumberOfSeats() + " "
+        //                + "RoomAddressID:" + room.getRoomAddressID() + " "
+        //                + "Type:" + room.getType() + " "));
 
-        try{
-            personRepository.readAll();
-        }catch (Exception e){
-            throw new RuntimeException("Person with:" + personList +"not found");
+
+        try {
+
+            List<Room> roomList = roomRepository.readAll();
+            return JsonGetRoomListResponse.builder().rooms(roomList
+                    .stream()
+                    .map(JsonRoomResponse::toJson)
+                    .collect(Collectors.toList())).build();
+
+        } catch (Exception e) {
+
+            throw new RuntimeException("Room not found");
         }
-        return null;
     }
 }
 

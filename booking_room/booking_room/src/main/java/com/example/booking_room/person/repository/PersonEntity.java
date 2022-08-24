@@ -25,7 +25,7 @@ public class PersonEntity {
     public String lastName;
 
     @Column(name = "phone_number")
-    public String phoneNumber;
+    public Integer phoneNumber;
 
     @Column(name = "email")
     public String email;

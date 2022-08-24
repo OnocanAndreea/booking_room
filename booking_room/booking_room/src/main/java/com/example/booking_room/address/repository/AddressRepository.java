@@ -1,12 +1,14 @@
-package com.example.booking_room.person.repository;
+package com.example.booking_room.address.repository;
 
+import com.example.booking_room.address.Address;
 import com.example.booking_room.person.Person;
+import com.example.booking_room.person.repository.PersonEntity;
+import com.example.booking_room.person.repository.PersonRepository;
 import lombok.NonNull;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManagerFactory;
@@ -16,12 +18,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
-public class PersonRepository {
+public class AddressRepository {
 
-    public final SessionFactory hibernateFactory;
+    final SessionFactory hibernateFactory;
 
     @Autowired
-    public PersonRepository(EntityManagerFactory factory) {
+    public AddressRepository(EntityManagerFactory factory) {
         if (factory.unwrap(SessionFactory.class) == null) {
             throw new NullPointerException("factory is not a hibernate factory");
         }
@@ -30,24 +32,24 @@ public class PersonRepository {
 
     @NonNull
     //works
-    public Person create(@NonNull final Person person) // must return a Person
+    public Address create(@NonNull final Address address) // must return a Address
     {
-        // todo: map(setez valorile in field) Person to PersonEntity
-        //am convertit obiectul in entity
-        final PersonEntity personEntity = toEntity(person);
 
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
+        //am convertit obiectul in entity
+        final AddressEntity addressEntity = toEntity(address);
+
+
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
             //salvez o persoana in db
-            final Serializable personId = session.save(personEntity);
+            final Serializable addressId = session.save(addressEntity);
             //am adaugat persoana cu succes daca nu e ok intram in catch
             transaction.commit();
             //de parca am executa un select(verific persoana in db daca o aparut)
-            final PersonEntity savedPersonEntity = session.load(PersonEntity.class, personId);
+            final AddressEntity savedAddressEntity = session.load(AddressEntity.class, addressId);
             //convertesc entityul in pojo
-            return fromEntity(savedPersonEntity);
+            return fromEntity(savedAddressEntity);
 
         } catch (Exception e) {
             if (transaction != null) {
@@ -58,19 +60,19 @@ public class PersonRepository {
     }
 
     //works
-    public Person readByID(Integer personID) {
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
+    public Address readByID(Integer addressID) {
+
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
 
-            PersonEntity personEntity = session.get(PersonEntity.class, personID);
+            AddressEntity addressEntity = session.get(AddressEntity.class, addressID);
 
-            System.out.println("Getting personEntity by personID:" + personID);
+            System.out.println("Getting addressEntity by addressID:" + addressID);
 
             transaction.commit();
 
-            return fromEntity(personEntity);
+            return fromEntity(addressEntity);
 
         } catch (Exception e) {
             if (transaction != null) {
@@ -82,18 +84,18 @@ public class PersonRepository {
     }
 
     //works
-    public void deleteByID(@NonNull Integer personID) {
+    public void deleteByID(@NonNull Integer addressID) {
         // todo: use Hibernate EntityManger or Session to persist the entity in DB
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
 
-            PersonEntity personEntity = session.load(PersonEntity.class, personID);
+            AddressEntity addressEntity = session.load(AddressEntity.class, addressID);
 
-            System.out.println("in delete byid personentity:" + personEntity);
+            System.out.println("in delete by id addressentity:" + addressEntity);
 
-            if (personEntity != null) {
-                session.delete(personEntity);
+            if (addressEntity != null) {
+                session.delete(addressEntity);
                 transaction.commit();
             } else {
                 transaction.rollback();
@@ -110,33 +112,27 @@ public class PersonRepository {
     }
 
     @NonNull
-    public  List<Person> readAll() {
+    public List<Address> readAll() {
         Transaction transaction = null;
         Session session = null;
-        List<PersonEntity> personEntityList = new ArrayList<PersonEntity>();
-
+        List<AddressEntity> addressEntityList;
         try {
             // start a transaction
             session = hibernateFactory.openSession();
             transaction = session.beginTransaction();
             // commit transaction
-            personEntityList = session.createQuery("from PersonEntity ", PersonEntity.class).getResultList();
+            addressEntityList = session.createQuery("from AddressEntity", AddressEntity.class).getResultList();
             transaction.commit();
-            List<Person> personList = new ArrayList<Person>();
-            // iti converteste un entitty in object
-          //  for (PersonEntity personEntity : personEntityList) {
-          //      personList.add(fromEntity(personEntity));
-         //   }
-
-            return personEntityList
+            return addressEntityList
                     .stream()
-                    .map(PersonRepository::fromEntity)
+                    .map(AddressRepository::fromEntity)
                     .collect(Collectors.toList());
 
 
         } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
+                throw e;
             }
 
         } finally {
@@ -144,18 +140,17 @@ public class PersonRepository {
                 session.close();
             }
         }
-
         return null;
     }
 
     @NonNull
-    // this one simply inserts a new person
-    public Person update(@NonNull final Person person) // must return a
+    // this one simply inserts a new address
+    public Address update(@NonNull final Address address) // must return a
     {
-        System.out.println("in update got person:" + person);
-        // todo: map Person to PersonEntity
-        final PersonEntity personEntity = toEntity(person);
-        System.out.println("in update personentity:" + personEntity);
+        System.out.println("in update got address:" + address);
+        // todo: map Address to AddressEntity
+        final AddressEntity addressEntity = toEntity(address);
+        System.out.println("in update addressentity:" + addressEntity);
 
         // todo: use Hibernate EntityManger or Session to persist the entity in DB
         Session session = null;
@@ -164,16 +159,16 @@ public class PersonRepository {
             session = hibernateFactory.openSession();
             transaction = session.beginTransaction();
 
-            session.saveOrUpdate(personEntity); //this way it created a new row
-            //session.update(personEntity);
+            session.saveOrUpdate(addressEntity); //this way it created a new row
+            //session.update(addressEntity);
             transaction.commit();
-            return fromEntity(personEntity);
+            return fromEntity(addressEntity);
 
         } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
             }
-            throw new RuntimeException(e);
+            throw e;
         } finally {
             if (session != null) {
                 session.close();
@@ -183,26 +178,26 @@ public class PersonRepository {
 
     //todo entity to domain object
     @NonNull
-    public static Person fromEntity(@NonNull final PersonEntity personEntity) {
-        return Person.builder()
-                .personID(personEntity.getPersonID())
-                .firstName(personEntity.getFirstName())
-                .lastName(personEntity.getLastName())
-                .role(personEntity.getRole())
-                .email(personEntity.getEmail())
-                .phoneNumber(personEntity.getPhoneNumber())
+    public static Address fromEntity(@NonNull final AddressEntity addressEntity) {
+        return Address.builder()
+                .addressID(addressEntity.getAddressID())
+                .city(addressEntity.getCity())
+                .street(addressEntity.getStreet())
+                .streetNumber(addressEntity.getStreetNumber())
+                .floor(addressEntity.getFloor())
+                .roomNumber(addressEntity.getRoomNumber())
                 .build();
     }
 
     @NonNull
-    private static PersonEntity toEntity(@NonNull final Person person) {
-        return PersonEntity.builder()
-                .personID(person.getPersonID())
-                .firstName(person.getFirstName())
-                .lastName(person.getLastName())
-                .phoneNumber(person.getPhoneNumber())
-                .role(person.getRole())
-                .email(person.getEmail())
+    private static AddressEntity toEntity(@NonNull final Address address) {
+        return AddressEntity.builder()
+                .addressID(address.getAddressID())
+                .city(address.getCity())
+                .street(address.getStreet())
+                .streetNumber(address.getStreetNumber())
+                .floor(address.getFloor())
+                .roomNumber(address.getRoomNumber())
                 .build();
     }
 }
