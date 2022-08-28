@@ -142,11 +142,11 @@ public class RoomRepository {
     public @NonNull Room update(@NonNull final Room room) // must return a Person?
     {
         System.out.println("in update got person:" + room);
-        // todo: map Person to RoomEntity
+
         final @NonNull RoomEntity roomEntity = toEntity(room);
         System.out.println("in update roomentity:" + roomEntity);
 
-        // todo: use Hibernate EntityManager or Session to persist the entity in DB
+
         Session session = null;
         Transaction transaction = null;
         try {
@@ -154,7 +154,7 @@ public class RoomRepository {
             transaction = session.beginTransaction();
 
             session.saveOrUpdate(roomEntity); //this way it created a new row
-            //session.update(personEntity);
+
             transaction.commit();
             return fromEntity(roomEntity);
 

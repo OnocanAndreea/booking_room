@@ -43,7 +43,4 @@ public class JsonPersonResponse {
                 .build();
     }
 
-   // @JsonProperty("createdAt")
-   // @JsonFormat(pattern = "yyyy-mm-dd")
-   // LocalDate createdAt;
 }

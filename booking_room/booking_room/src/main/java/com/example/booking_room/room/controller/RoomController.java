@@ -1,7 +1,6 @@
 package com.example.booking_room.room.controller;
 
 import com.example.booking_room.room.RegisterRoomRequest;
-import com.example.booking_room.room.Room;
 import com.example.booking_room.room.UpdateRoomRequest;
 import com.example.booking_room.room.controller.data.JsonGetRoomListResponse;
 import com.example.booking_room.room.controller.data.JsonRoomResponse;
