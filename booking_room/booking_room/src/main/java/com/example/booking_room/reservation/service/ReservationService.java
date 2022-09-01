@@ -3,6 +3,7 @@ package com.example.booking_room.reservation.service;
 
 import com.example.booking_room.person.Person;
 import com.example.booking_room.person.repository.PersonRepository;
+import com.example.booking_room.reservation.CheckDate;
 import com.example.booking_room.reservation.RegisterReservationRequest;
 import com.example.booking_room.reservation.Reservation;
 import com.example.booking_room.reservation.UpdateReservationRequest;
@@ -54,55 +55,13 @@ public class ReservationService {
             throw new RuntimeException("the room is not big enough");
         }
 
-        try {
-
-            List<Reservation> reservationList = reservationRepository.readAll();
-            List<Integer> collectedReservedRoomID = new ArrayList<>();
-            for (Reservation reservation : reservationList) {
-                String specificDate = registerReservationRequest.getDate();
-                LocalDate date = LocalDate.parse(specificDate);
-                if (date.compareTo(registerReservationRequest.getArrivalDate()) > 0 && date.compareTo(registerReservationRequest.getDepartureDate()) < 0) {
-                    collectedReservedRoomID.add(reservation.getReservedRoomID());
-                }
-            }
-//            List<Room> roomList = roomRepository.readAll();
-//            for (Room room1 : roomList) {
-//                System.out.printf("roomid from roomlist: " + room.getRoomID());
-//                for (Integer roomID1 : collectedReservedRoomID) {
-//                    if (roomID1 != room.getRoomID())
-//                        System.out.println("roomid from list" + room.getRoomID());
-//                }
-//            }
-//            List<Room> roomList2 = roomRepository.readAll();
-//            for (Room room2 : roomList2) {
-//                //  if(room.roomList2 == collectedReservedRoomID){
-//                System.out.println();
-//            }
-
-        }catch (Exception e){
-            throw new RuntimeException("error");
-        }
-
-//            List<Room> rooms = roomRepository.readAll();
-//            for (Room room1 : rooms) {
-//                roomids.add(room1.getRoomID());
-//            }
-//
-//            List<Reservation> reservations = reservationRepository.readAll();
-//            for (Reservation reservation1 : reservations) {
-//                String specificDate = registerReservationRequest.getDate();
-//                LocalDate getdate = LocalDate.parse(specificDate);
-//                if (getdate.compareTo(registerReservationRequest.getFro()) >= 0) {
-//                    roomids.add(reservation1.getReservationID());
-//                }
-
-
-
-        LocalDate date = LocalDate.parse(registerReservationRequest.getDate());//LocalDate to String conversion
+        LocalDate date = LocalDate.parse(registerReservationRequest.getArrivalDate());//LocalDate to String conversion
+        LocalDate date2 = LocalDate.parse(registerReservationRequest.getDepartureDate());
 
         final Reservation reservation = Reservation.builder()
                 .numberOfInvitedPersons(registerReservationRequest.getNumberOfInvitedPersons())
-                .date(date)//here I added the conversion
+                .arrivalDate(date)//here I added the conversion
+                .departureDate(date2)
                 .reservedRoomID(registerReservationRequest.getReservedRoomID())
                 .organizerPersonID(registerReservationRequest.getOrganizerPersonID())
                 .build();
@@ -137,7 +96,7 @@ public class ReservationService {
     public JsonReservationResponse updateReservation(@NonNull final Integer reservationID, @NonNull final UpdateReservationRequest updateReservationRequest) {
         System.out.println(reservationID);
 
-        LocalDate date = LocalDate.parse(updateReservationRequest.getDate());
+        LocalDate date = LocalDate.parse(updateReservationRequest.getArrivalDate());
 
         if (!date.equals("dd-mm-yyyy")) {
             throw new RuntimeException("this date is not correct");
@@ -157,10 +116,15 @@ public class ReservationService {
         } else {
             reservationUpdate.numberOfInvitedPersons(existingReservation.getNumberOfInvitedPersons());
         }
-        if (updateReservationRequest.getDate() != null) {
-            reservationUpdate.date(date);
+        if (updateReservationRequest.getArrivalDate() != null) {
+            reservationUpdate.arrivalDate(date);
         } else {
-            reservationUpdate.date(existingReservation.getDate());
+            reservationUpdate.arrivalDate(existingReservation.getArrivalDate());
+        }
+        if (updateReservationRequest.getDepartureDate() != null) {
+            reservationUpdate.departureDate(date);
+        } else {
+            reservationUpdate.departureDate(existingReservation.getDepartureDate());
         }
         if (updateReservationRequest.getReservedRoomID() != null) {
             reservationUpdate.reservedRoomID(updateReservationRequest.getReservedRoomID());
@@ -198,4 +162,16 @@ public class ReservationService {
 
     }
 
+    public JsonGetReservationListResponse getAllAvailableRooms(@NonNull final CheckDate checkDate) {
+
+        try {
+            reservationRepository.readAllReservations(checkDate);
+        } catch (Exception e) {
+            throw e;
+        }
+        return null;
+    }
+
+
 }
+

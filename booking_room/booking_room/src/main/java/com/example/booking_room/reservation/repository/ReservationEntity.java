@@ -1,13 +1,10 @@
 package com.example.booking_room.reservation.repository;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import javax.persistence.*;
-
 import java.time.LocalDate;
-import java.util.Date;
 
 
 @Builder
@@ -17,6 +14,7 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @Table(name = "reservation")
+
 public class ReservationEntity {
 
     @Id
@@ -29,10 +27,10 @@ public class ReservationEntity {
     public Integer numberOfInvitedPersons;
 
     @Column(name = "arrival_date")
-    public LocalDate arrival_date;
+    public LocalDate arrivalDate;
 
     @Column(name = "departure_date")
-    public LocalDate departure_date;
+    public LocalDate departureDate;
 
     @Column(name = "reserved_room_id")
     public Integer reservedRoomID;

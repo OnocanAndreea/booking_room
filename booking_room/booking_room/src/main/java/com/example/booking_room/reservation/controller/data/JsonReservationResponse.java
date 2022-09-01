@@ -23,8 +23,11 @@ public class JsonReservationResponse {
     @JsonProperty("numberOfInvitedPersons")
     Integer numberOfInvitedPersons;
 
-    @JsonProperty("date")
-    String date;
+    @JsonProperty("arrivalDate")
+    String arrivalDate;
+
+    @JsonProperty("departureDate")
+    String departureDate;
 
     @JsonProperty("reservedRoomID")
     Integer reservedRoomID;
@@ -37,8 +40,8 @@ public class JsonReservationResponse {
         return JsonReservationResponse.builder()
                 .reservationID(reservation.getReservationID())
                 .numberOfInvitedPersons(reservation.getNumberOfInvitedPersons())
-                .arrival_date(reservation.getArrival_date().toString())//am facut conversie in string deoarece postmanu nu suporta localdate-u
-                .departure_date(reservation.getDeparture_date().toString())
+                .arrivalDate(reservation.getArrivalDate().toString())//am facut conversie in string deoarece postmanu nu suporta localdate-u
+                .departureDate(reservation.getDepartureDate().toString())
                 .reservedRoomID(reservation.getReservedRoomID())
                 .organizerPersonID(reservation.getOrganizerPersonID())
                 .build();

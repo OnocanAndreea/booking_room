@@ -20,10 +20,10 @@ public class Reservation {
     Integer numberOfInvitedPersons;
 
     @NonNull
-    LocalDate arrival_date;
+    LocalDate arrivalDate;
 
     @NonNull
-    LocalDate departure_date;
+    LocalDate departureDate;
 
     @NonNull
     Integer reservedRoomID;

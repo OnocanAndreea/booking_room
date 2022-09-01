@@ -75,6 +75,11 @@
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.mailgun</groupId>
+			<artifactId>mailgun-java</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 
 		<!-- TESTING -->
 		<dependency>
@@ -92,6 +97,7 @@
 			<version>RELEASE</version>
 			<scope>compile</scope>
 		</dependency>
+
 
 	</dependencies>
 

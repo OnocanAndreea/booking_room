@@ -1,5 +1,6 @@
 package com.example.booking_room.reservation.repository;
 
+import com.example.booking_room.reservation.CheckDate;
 import com.example.booking_room.reservation.Reservation;
 import lombok.NonNull;
 import org.hibernate.Session;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManagerFactory;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +22,7 @@ public class ReservationRepository {
 
     @Autowired
     public ReservationRepository(EntityManagerFactory factory) {
+
         if (factory.unwrap(SessionFactory.class) == null) {
             throw new NullPointerException("factory is not a hibernate factory");
         }
@@ -35,21 +36,30 @@ public class ReservationRepository {
         //am convertit obiectul in entity
         final ReservationEntity reservationEntity = toEntity(reservation);
 
+
         Transaction transaction = null;
-        try (Session session = hibernateFactory.openSession()) {
+
+        try ( Session session = hibernateFactory.openSession()){
+
             transaction = session.beginTransaction();
             //verific daca exista deja o rezervare pe camera aia si data aia
-            Query existingReservationsQuery =  session.createQuery("from ReservationEntity where reservedRoomID=?" +
-                    " and date=?");
-            existingReservationsQuery.setParameter(0, reservation.getReservedRoomID());
-            existingReservationsQuery.setParameter(1,reservation.getDate());
+
+            Query existingReservationsQuery = session.createQuery("from ReservationEntity where reservedRoomID = :reservedRoomID and arrivalDate >= :arrivalDate" +
+                    " and departureDate <= :departureDate");
+
+            existingReservationsQuery.setParameter("reservedRoomID", reservation.getReservedRoomID());
+            existingReservationsQuery.setParameter("arrivalDate",reservation.getArrivalDate());
+            existingReservationsQuery.setParameter("departureDate",reservation.getDepartureDate());
+
+            if(reservation.getArrivalDate().isAfter(reservation.getDepartureDate())){
+                throw new RuntimeException("the dates aren't correct");
+            }
 
             Reservation existingReservation = (Reservation) existingReservationsQuery.uniqueResult();
 
-            if(existingReservation.getReservationID() != 0) {
+            if(existingReservation != null) {
                 throw new RuntimeException("This room is already booked for the given date!");
-                }
-
+            }
 
             //salvez o persoana in db
             final Serializable reservationId = session.save(reservationEntity);
@@ -64,7 +74,7 @@ public class ReservationRepository {
             if (transaction != null) {
                 transaction.rollback();
             }
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -122,11 +132,11 @@ public class ReservationRepository {
 
     @NonNull
     public List<Reservation> readAll() {
-        System.out.println("in rep readall");
+
         Transaction transaction = null;
         Session session = null;
-        List<ReservationEntity> reservationEntityList ;
 
+        List<ReservationEntity> reservationEntityList;
         try {
             // start a transaction
             session = hibernateFactory.openSession();
@@ -134,8 +144,7 @@ public class ReservationRepository {
             // commit transaction
             reservationEntityList = session.createQuery("from ReservationEntity ", ReservationEntity.class).getResultList();
             transaction.commit();
-            List<Reservation> reservationList;
-            System.out.println("in try catch rep readall");
+
             return reservationEntityList
                     .stream()
                     .map(ReservationRepository::fromEntity)
@@ -189,12 +198,40 @@ public class ReservationRepository {
     }
 
     @NonNull
+    public Reservation readAllReservations( @NonNull final CheckDate checkDate) {
+
+        Transaction transaction = null;
+
+        try (Session session = hibernateFactory.openSession()){
+
+            transaction = session.beginTransaction();
+
+
+            Query freeRoomsReservation = session.createNamedQuery("SELECT reservedRoomID FROM reservation a WHERE fromDate >= :fromDate and toDate <= :toDate ");
+
+
+            freeRoomsReservation.setParameter("fromDate",checkDate.getFromDate());
+            freeRoomsReservation.setParameter("toDate",checkDate.getToDate());
+
+            Reservation existingReservation = (Reservation) freeRoomsReservation.uniqueResult();
+
+            return null;
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw e;
+        }
+    }
+
+    @NonNull
     public static Reservation fromEntity(@NonNull final ReservationEntity reservationEntity) {
         return Reservation.builder()
                 .reservationID(reservationEntity.getReservationID())
                 .numberOfInvitedPersons(reservationEntity.getNumberOfInvitedPersons())
-                .arrival_date(reservationEntity.getArrival_date())
-                .departure_date(reservationEntity.getDeparture_date())
+                .arrivalDate(reservationEntity.getArrivalDate())
+                .departureDate(reservationEntity.getDepartureDate())
                 .reservedRoomID(reservationEntity.getReservedRoomID())
                 .organizerPersonID(reservationEntity.getOrganizerPersonID())
                 .build();
@@ -205,8 +242,8 @@ public class ReservationRepository {
         return ReservationEntity.builder()
                 .reservationID(reservation.getReservationID())
                 .numberOfInvitedPersons(reservation.getNumberOfInvitedPersons())
-                .departure_date(reservation.getDeparture_date())
-                .arrival_date(reservation.getDeparture_date())
+                .departureDate(reservation.getDepartureDate())
+                .arrivalDate(reservation.getArrivalDate())
                 .reservedRoomID(reservation.getReservedRoomID())
                 .organizerPersonID(reservation.getOrganizerPersonID())
                 .build();

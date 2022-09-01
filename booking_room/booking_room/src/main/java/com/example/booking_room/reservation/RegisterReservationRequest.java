@@ -18,20 +18,17 @@ public class RegisterReservationRequest {
     @JsonProperty("numberOfInvitedPersons")
     Integer numberOfInvitedPersons;
 
-    @JsonProperty("date")
-    String date;
+    @JsonProperty("arrivalDate")
+    String arrivalDate;
+
+    @JsonProperty("departureDate")
+    String departureDate;
 
     @JsonProperty("reservedRoomID")
     Integer reservedRoomID;
 
     @JsonProperty("organizerPersonID")
     Integer organizerPersonID;
-
-    @JsonProperty("arrivalDate")
-    LocalDate arrivalDate;
-
-    @JsonProperty("departureDate")
-    LocalDate departureDate;
 
     @JsonProperty("personID")
     Integer personID;
