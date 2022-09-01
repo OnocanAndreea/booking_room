@@ -11,6 +11,8 @@ import com.example.booking_room.reservation.controller.data.JsonGetReservationLi
 import com.example.booking_room.reservation.controller.data.JsonReservationResponse;
 import com.example.booking_room.reservation.repository.ReservationRepository;
 import com.example.booking_room.room.Room;
+import com.example.booking_room.room.controller.data.JsonGetRoomListResponse;
+import com.example.booking_room.room.controller.data.JsonRoomResponse;
 import com.example.booking_room.room.repository.RoomRepository;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,7 @@ public class ReservationService {
     @NonNull
     private final PersonRepository personRepository;
 
-    public ReservationService(@NonNull final ReservationRepository reservationRepository, @NonNull RoomRepository roomRepository, @NonNull PersonRepository personRepository) throws Exception {
+    public ReservationService(@NonNull final ReservationRepository reservationRepository, @NonNull final RoomRepository roomRepository, @NonNull PersonRepository personRepository)  {
         this.reservationRepository = reservationRepository;
         this.roomRepository = roomRepository;
         this.personRepository = personRepository;
@@ -69,7 +71,7 @@ public class ReservationService {
             final Reservation registeredReservation = reservationRepository.create(reservation);
             return JsonReservationResponse.toJson(registeredReservation);
         } catch (Exception e) {
-            throw e;
+            throw new RuntimeException("registration could not be completed");
         }
     }
 
@@ -151,27 +153,39 @@ public class ReservationService {
             List<Reservation> reservationList = reservationRepository.readAll();
             return JsonGetReservationListResponse.builder().reservations(reservationList
                             .stream()
-                            .map(reservation -> JsonReservationResponse.toJson(reservation))
+                            .map(JsonReservationResponse::toJson)
                             .collect(Collectors.toList()))
                     .build();
 
         } catch (Exception e) {
-            System.out.println(e);
             throw new RuntimeException("we can not show you the reservations from the list");
         }
 
     }
 
-    public JsonGetReservationListResponse getAllAvailableRooms(@NonNull final CheckDate checkDate) {
+    public JsonGetRoomListResponse getAllRoomsAvailable(@NonNull final CheckDate checkDate) {
+
+        LocalDate fromDate = LocalDate.parse(checkDate.getFromDate());
+        LocalDate toDate = LocalDate.parse(checkDate.getToDate());
 
         try {
-            reservationRepository.readAllReservations(checkDate);
+            List<Reservation> availableRoomListIds = reservationRepository.readAll();
+            List<Integer> collectedReservedRoomID = new ArrayList<>();
+            for (Reservation reservation : availableRoomListIds) {
+                if (reservation.getArrivalDate().compareTo(fromDate) > 0 && reservation.getDepartureDate().compareTo(toDate) < 0) {
+                    collectedReservedRoomID.add(reservation.getReservedRoomID()); //todo availableroomsID return jsonresponse cu roomID
+                }
+            }
+//            return JsonGetRoomListResponse.builder().rooms(availableRoomListIds
+//                            .stream()
+//                            .map(JsonRoomResponse::getRoomID)
+//                            .collect(Collectors.toList()))
+//                            .build();
+
         } catch (Exception e) {
-            throw e;
+            throw new RuntimeException(e);
         }
-        return null;
+return null;
     }
-
-
 }
 

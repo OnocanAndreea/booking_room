@@ -6,6 +6,8 @@ import com.example.booking_room.reservation.UpdateReservationRequest;
 import com.example.booking_room.reservation.controller.data.JsonGetReservationListResponse;
 import com.example.booking_room.reservation.controller.data.JsonReservationResponse;
 import com.example.booking_room.reservation.service.ReservationService;
+import com.example.booking_room.room.controller.data.JsonGetRoomListResponse;
+import com.example.booking_room.room.service.RoomService;
 import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,28 +20,22 @@ public class ReservationController {
 
     @NonNull
     private final ReservationService reservationService;
+    private final RoomService roomService;
 
-    public ReservationController(@NonNull ReservationService reservationService) {
+    public ReservationController(@NonNull ReservationService reservationService, RoomService roomService) {
         this.reservationService = reservationService;
+        this.roomService = roomService;
     }
 
-
-    //works
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public void getTest() {
-
-        System.out.println("The test works");
-    }
-    @RequestMapping(value = "/availablerooms", method = RequestMethod.GET)
-    public ResponseEntity<?> getAllFreeRooms(@RequestBody CheckDate checkDate) {
-        try{
-            JsonGetReservationListResponse jsonGetReservationListResponse = reservationService.getAllAvailableRooms(checkDate);
-            return ResponseEntity.ok(jsonGetReservationListResponse);
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body((e.getMessage()));
+    @GetMapping(value = "/available_rooms")
+    public ResponseEntity<?> getAllRoomsAvailable(@RequestBody @NonNull final CheckDate checkDate) {
+//todo getAvailableRoomIds
+        try {
+            JsonGetRoomListResponse jsonAvailableRoomIds = reservationService.getAllRoomsAvailable(checkDate);
+            return ResponseEntity.ok(jsonAvailableRoomIds);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
     }
 
     //works

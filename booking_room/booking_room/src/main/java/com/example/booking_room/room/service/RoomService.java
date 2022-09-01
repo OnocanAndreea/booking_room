@@ -117,18 +117,6 @@ public class RoomService {
     }
 
     public JsonGetRoomListResponse getAllRooms() {
-        //for (Room room : roomList) {
-        //     System.out.println("RoomID: " + room.getRoomID() + " "
-        //             + "NumberOfSeats:" + room.getNumberOfSeats() + " "
-        //             + "RoomAddressID:" + room.getRoomAddressID() + " "
-        //             + "Type:" + room.getType() + " ");
-        // }
-        //roomList.
-        //        forEach(room -> System.out.println("RoomID: " + room.getRoomID() + " "
-        //                + "NumberOfSeats:" + room.getNumberOfSeats() + " "
-        //                + "RoomAddressID:" + room.getRoomAddressID() + " "
-        //                + "Type:" + room.getType() + " "));
-
 
         try {
 

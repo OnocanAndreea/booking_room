@@ -166,7 +166,7 @@ public class ReservationRepository {
 
     @NonNull
     // this one simply inserts a new reservation
-    public Reservation update(@NonNull final Reservation reservation) // must return a
+    public Reservation update(@NonNull final Reservation reservation)
     {
         System.out.println("in update got reservation:" + reservation);
 
@@ -197,33 +197,6 @@ public class ReservationRepository {
         }
     }
 
-    @NonNull
-    public Reservation readAllReservations( @NonNull final CheckDate checkDate) {
-
-        Transaction transaction = null;
-
-        try (Session session = hibernateFactory.openSession()){
-
-            transaction = session.beginTransaction();
-
-
-            Query freeRoomsReservation = session.createNamedQuery("SELECT reservedRoomID FROM reservation a WHERE fromDate >= :fromDate and toDate <= :toDate ");
-
-
-            freeRoomsReservation.setParameter("fromDate",checkDate.getFromDate());
-            freeRoomsReservation.setParameter("toDate",checkDate.getToDate());
-
-            Reservation existingReservation = (Reservation) freeRoomsReservation.uniqueResult();
-
-            return null;
-
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            throw e;
-        }
-    }
 
     @NonNull
     public static Reservation fromEntity(@NonNull final ReservationEntity reservationEntity) {
