@@ -38,4 +38,7 @@ public class ReservationEntity {
     @Column(name = "organizer_person_id")
     public Integer organizerPersonID;
 
+    @Column (name = "accepted")
+    public  Boolean accepted = false;
+
 }

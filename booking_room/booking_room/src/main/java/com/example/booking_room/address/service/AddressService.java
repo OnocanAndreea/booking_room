@@ -23,7 +23,7 @@ public class AddressService {
         this.addressRepository = addressRepository;
     }
 
-    public JsonAddressResponse registerAddress(@NonNull final RegisterAddressRequest registerAddressRequest) { // must return a JsonPerson
+    public JsonAddressResponse registerAddress(@NonNull final RegisterAddressRequest registerAddressRequest) {
 
         final Address address = Address.builder()
                 .city(registerAddressRequest.getCity())
@@ -34,7 +34,6 @@ public class AddressService {
                 .build();
 
         final Address registeredAddress = addressRepository.create(address);
-
 
         return JsonAddressResponse.toJson(registeredAddress);
     }
@@ -60,11 +59,10 @@ public class AddressService {
     }
 
     public JsonAddressResponse updateAddress(@NonNull final Integer addressID, @NonNull final UpdateAddressRequest updateAddressRequest) {
-        System.out.println(addressID);
 
         final Address existingAddress = addressRepository.readByID(addressID);
 
-        if (existingAddress == null) { //here throw exception
+        if (existingAddress == null) {
             throw new RuntimeException("The address with id: " + addressID + " doesn't exist. Please register a request to create a new person");
         }
 
@@ -74,7 +72,6 @@ public class AddressService {
             addressUpdate.city(updateAddressRequest.getCity());
         } else {
             addressUpdate.city(existingAddress.getCity());
-            System.out.println("FirstName in address service:" + existingAddress.getCity());
         }
         if (updateAddressRequest.getStreet() != null) {
             addressUpdate.street(updateAddressRequest.getStreet());
@@ -100,28 +97,18 @@ public class AddressService {
         final Address updatedAddress = addressUpdate.build();
 
         final Address updatedAddressResponse = addressRepository.update(updatedAddress);
-        System.out.println("updatedAddress" + updatedAddress);
 
         return JsonAddressResponse.toJson(updatedAddressResponse);
     }
 
     public JsonGetAddressListResponse getAllAddresses() {
 
-        //for (Address address : addressList) {
-        //    System.out.println("AddressID: " + address.getAddressID() + " "
-        //             + "FirstName:" + address.getFirstName() + " "
-        //             + "LastName:" + address.getLastName() + " "
-        //             + "Email:" + address.getEmail() + " "
-        //             + "PhoneNumber:" + address.getPhoneNumber() + " "
-        //             + "Role:" + address.getRole());
-        //  }
-
         try {
             List<Address> addressList = addressRepository.readAll();
-            return JsonGetAddressListResponse.builder().addresses(addressList //am trans un for intr un stream
-                    .stream()
-                    .map(address -> JsonAddressResponse.toJson(address))//map ul imi ia elem din lista de pers si le transf intr o jsonlista
-                    .collect(Collectors.toList()))
+            return JsonGetAddressListResponse.builder().addresses(addressList
+                            .stream()
+                            .map(address -> JsonAddressResponse.toJson(address))
+                            .collect(Collectors.toList()))
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("we can not show you the addresses from the list");

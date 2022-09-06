@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-//endpoint by default
 @RequestMapping("person")
 public class PersonController {
     @NonNull
@@ -25,14 +24,12 @@ public class PersonController {
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public void getTest() {
 
-        System.out.println("The test works");
     }
 
-    //works
     @RequestMapping(value = "/persons", method = RequestMethod.GET)
     public ResponseEntity<?> getAll() {
         try {
-           JsonGetPersonListResponse jsonGetPersonListResponse = personService.getAllPersons();
+            JsonGetPersonListResponse jsonGetPersonListResponse = personService.getAllPersons();
             return ResponseEntity.ok(jsonGetPersonListResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -40,7 +37,6 @@ public class PersonController {
         }
     }
 
-    //works, but there is no Exception handled
     @GetMapping(value = "/{personID}")
     public ResponseEntity<?> getById(@PathVariable Integer personID) {
         try {
@@ -52,9 +48,8 @@ public class PersonController {
         }
     }
 
-    // works, but there is no Exception handled
     @RequestMapping(value = "/{personID}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> delete(@PathVariable Integer personID) { // todo same with res entity
+    public ResponseEntity<?> delete(@PathVariable Integer personID) {
         try {
             personService.deletePersonByID(personID);
             return ResponseEntity.ok("the person was deleted");
@@ -64,9 +59,8 @@ public class PersonController {
         }
     }
 
-    // works
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> add(@RequestBody RegisterPersonRequest registerPersonRequest) { // todo resp entity 200
+    public ResponseEntity<?> add(@RequestBody RegisterPersonRequest registerPersonRequest) {
 
         try {
             JsonPersonResponse jsonPersonResponse = personService.registerPerson(registerPersonRequest);
@@ -78,7 +72,6 @@ public class PersonController {
 
     }
 
-    // this works
     @PutMapping(value = "/{personID}")
     public ResponseEntity<?> update(@RequestBody UpdatePersonRequest updatePersonRequest, @PathVariable Integer personID) {
         System.out.println("Person with personId:" + personID + " to update");

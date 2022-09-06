@@ -30,23 +30,15 @@ public class PersonRepository {
 
     @NonNull
     //works
-    public Person create(@NonNull final Person person) // must return a Person
-    {
-        // todo: map(setez valorile in field) Person to PersonEntity
-        //am convertit obiectul in entity
+    public Person create(@NonNull final Person person) {
         final PersonEntity personEntity = toEntity(person);
 
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
-            //salvez o persoana in db
             final Serializable personId = session.save(personEntity);
-            //am adaugat persoana cu succes daca nu e ok intram in catch
             transaction.commit();
-            //de parca am executa un select(verific persoana in db daca o aparut)
             final PersonEntity savedPersonEntity = session.load(PersonEntity.class, personId);
-            //convertesc entityul in pojo
             return fromEntity(savedPersonEntity);
 
         } catch (Exception e) {
@@ -57,19 +49,13 @@ public class PersonRepository {
         }
     }
 
-    //works
     public Person readByID(Integer personID) {
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
+
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
-
             PersonEntity personEntity = session.get(PersonEntity.class, personID);
-
-            System.out.println("Getting personEntity by personID:" + personID);
-
             transaction.commit();
-
             return fromEntity(personEntity);
 
         } catch (Exception e) {
@@ -77,20 +63,16 @@ public class PersonRepository {
                 transaction.rollback();
             }
             throw e;
-
         }
     }
 
     //works
     public void deleteByID(@NonNull Integer personID) {
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
+
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
-
             PersonEntity personEntity = session.load(PersonEntity.class, personID);
-
-            System.out.println("in delete byid personentity:" + personEntity);
 
             if (personEntity != null) {
                 session.delete(personEntity);
@@ -104,29 +86,22 @@ public class PersonRepository {
                 transaction.rollback();
                 throw e;
             }
-
         }
-
     }
 
     @NonNull
-    public  List<Person> readAll() {
+    public List<Person> readAll() {
         Transaction transaction = null;
         Session session = null;
         List<PersonEntity> personEntityList = new ArrayList<PersonEntity>();
 
         try {
-            // start a transaction
             session = hibernateFactory.openSession();
             transaction = session.beginTransaction();
-            // commit transaction
+
             personEntityList = session.createQuery("from PersonEntity ", PersonEntity.class).getResultList();
             transaction.commit();
             List<Person> personList = new ArrayList<Person>();
-            // iti converteste un entitty in object
-          //  for (PersonEntity personEntity : personEntityList) {
-          //      personList.add(fromEntity(personEntity));
-         //   }
 
             return personEntityList
                     .stream()
@@ -138,34 +113,25 @@ public class PersonRepository {
             if (transaction != null) {
                 transaction.rollback();
             }
+            throw e;
 
         } finally {
             if (session != null) {
                 session.close();
             }
         }
-
-        return null;
     }
 
     @NonNull
-    // this one simply inserts a new person
-    public Person update(@NonNull final Person person) // must return a
-    {
-        System.out.println("in update got person:" + person);
-        // todo: map Person to PersonEntity
+    public Person update(@NonNull final Person person) {
         final PersonEntity personEntity = toEntity(person);
-        System.out.println("in update personentity:" + personEntity);
-
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
         Session session = null;
         Transaction transaction = null;
         try {
             session = hibernateFactory.openSession();
             transaction = session.beginTransaction();
 
-            session.saveOrUpdate(personEntity); //this way it created a new row
-            //session.update(personEntity);
+            session.saveOrUpdate(personEntity);
             transaction.commit();
             return fromEntity(personEntity);
 
@@ -181,7 +147,6 @@ public class PersonRepository {
         }
     }
 
-    //todo entity to domain object
     @NonNull
     public static Person fromEntity(@NonNull final PersonEntity personEntity) {
         return Person.builder()

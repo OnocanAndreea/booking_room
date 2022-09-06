@@ -25,12 +25,12 @@ public class RoomService {
 
     public RoomService(@NonNull RoomRepository roomRepository, @NonNull PersonRepository personRepository) {
         this.roomRepository = roomRepository;
-        this.personRepository=personRepository;
+        this.personRepository = personRepository;
     }
 
 
-    public JsonRoomResponse registerRoom(@NonNull final RegisterRoomRequest registerRoomRequest,@NonNull final Integer personID) { // must return a JsonRoomResponse
-        //trebuie sa adauge o pers cu ID existent o camera, verific daca exista pers , si daca are rolul ca admin
+    public JsonRoomResponse registerRoom(@NonNull final RegisterRoomRequest registerRoomRequest, @NonNull final Integer personID) {
+
 
         Person person = personRepository.readByID(personID);
 
@@ -39,7 +39,7 @@ public class RoomService {
         }
         String role = person.getRole();
 
-        if (!role.equals("admin")){
+        if (!role.equals("admin")) {
             throw new RuntimeException("this person" + personID + " can't add a room");
         }
 
@@ -111,7 +111,6 @@ public class RoomService {
         final Room updatedRoom = roomUpdate.build();
 
         final Room updatedRoomResp = roomRepository.update(updatedRoom);
-        System.out.println("updatedRoom" + updatedRoom);
 
         return JsonRoomResponse.toJson(updatedRoomResp);
     }

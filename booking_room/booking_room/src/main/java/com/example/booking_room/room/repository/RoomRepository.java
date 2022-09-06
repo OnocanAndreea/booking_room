@@ -20,37 +20,32 @@ public class RoomRepository {
     private final SessionFactory hibernateFactory;
 
     @Autowired
-    public RoomRepository(EntityManagerFactory factory){
-        if (factory.unwrap(SessionFactory.class) == null){
+    public RoomRepository(EntityManagerFactory factory) {
+        if (factory.unwrap(SessionFactory.class) == null) {
             throw new NullPointerException("factory is not a hibernate factory");
         }
         this.hibernateFactory = factory.unwrap(SessionFactory.class);
     }
 
     @NonNull
-
-    public Room create(@NonNull final Room room){ // must return a Room
+    public Room create(@NonNull final Room room) {
         final RoomEntity roomEntity = toEntity(room);
 
         Transaction transaction = null;
-        try(Session session = hibernateFactory.openSession()){
+        try (Session session = hibernateFactory.openSession()) {
 
             transaction = session.beginTransaction();
 
-            //salvez un room in db
             final Serializable roomId = session.save(roomEntity);
 
-            //am adaugat camera cu succes daca nu intram in catch
             transaction.commit();
 
-            //verific roomul in db sa vad daca o aparut(ca si cand as face un select in sql)
             final RoomEntity savedRoomEntity = session.load(RoomEntity.class, roomId);
 
-            //convertesc entityul in pojo
             return fromEntity(savedRoomEntity);
 
-        }catch (Exception e){
-            if (transaction != null){
+        } catch (Exception e) {
+            if (transaction != null) {
                 transaction.rollback();
             }
             throw new RuntimeException(e);
@@ -58,14 +53,11 @@ public class RoomRepository {
     }
 
     public Room readByID(Integer roomID) {
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
 
             RoomEntity roomEntity = session.get(RoomEntity.class, roomID);
-
-            System.out.println("Getting roomEntity by roomID:" + roomID);
 
             transaction.commit();
 
@@ -76,19 +68,16 @@ public class RoomRepository {
                 transaction.rollback();
             }
             throw e;
-
         }
     }
 
     public void deleteByID(@NonNull Integer roomID) {
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
+
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
 
             RoomEntity roomEntity = session.load(RoomEntity.class, roomID);
-
-            System.out.println("in delete by id roomentity:" + roomEntity);
 
             if (roomEntity != null) {
                 session.delete(roomEntity);
@@ -102,26 +91,24 @@ public class RoomRepository {
                 transaction.rollback();
                 throw e;
             }
-
         }
-
     }
 
     @NonNull
-    public  List<Room> readAll() {
+    public List<Room> readAll() {
         Transaction transaction = null;
         Session session = null;
-        List<RoomEntity> roomEntityList = new ArrayList<RoomEntity>();
+        List<RoomEntity> roomEntityList;
 
         try {
-            // start a transaction
+
             session = hibernateFactory.openSession();
             transaction = session.beginTransaction();
-            // commit transaction
+
             roomEntityList = session.createQuery("from RoomEntity ", RoomEntity.class).getResultList();
             transaction.commit();
-            List<Room> roomList = new ArrayList<Room>();
-            // iti converteste un entitty in object
+            List<Room> roomList = new ArrayList<>();
+
             for (RoomEntity roomEntity : roomEntityList) {
                 roomList.add(fromEntity(roomEntity));
             }
@@ -130,22 +117,17 @@ public class RoomRepository {
             if (transaction != null) {
                 transaction.rollback();
             }
+            throw e;
 
         } finally {
             if (session != null) {
                 session.close();
             }
         }
-        return null;
     }
-    // this one simply inserts a new person
-    public @NonNull Room update(@NonNull final Room room) // must return a Person?
-    {
-        System.out.println("in update got person:" + room);
 
+    public @NonNull Room update(@NonNull final Room room) {
         final @NonNull RoomEntity roomEntity = toEntity(room);
-        System.out.println("in update roomentity:" + roomEntity);
-
 
         Session session = null;
         Transaction transaction = null;
@@ -153,7 +135,7 @@ public class RoomRepository {
             session = hibernateFactory.openSession();
             transaction = session.beginTransaction();
 
-            session.saveOrUpdate(roomEntity); //this way it created a new row
+            session.saveOrUpdate(roomEntity);
 
             transaction.commit();
             return fromEntity(roomEntity);
@@ -170,10 +152,8 @@ public class RoomRepository {
         }
     }
 
-
-    //entity to domain object
     @NonNull
-    public Room fromEntity(@NonNull final RoomEntity roomEntity){
+    public Room fromEntity(@NonNull final RoomEntity roomEntity) {
         return Room.builder()
                 .roomID(roomEntity.getRoomID())
                 .numberOfSeats(roomEntity.getNumberOfSeats())
@@ -182,7 +162,7 @@ public class RoomRepository {
                 .build();
     }
 
-    public  static RoomEntity toEntity(@NonNull final Room room){
+    public static RoomEntity toEntity(@NonNull final Room room) {
         return RoomEntity.builder()
                 .roomID(room.getRoomID())
                 .numberOfSeats(room.getNumberOfSeats())
@@ -191,6 +171,5 @@ public class RoomRepository {
                 .build();
 
     }
-
 
 }

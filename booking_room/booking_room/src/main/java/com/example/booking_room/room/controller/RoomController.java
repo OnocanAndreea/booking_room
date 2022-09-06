@@ -59,7 +59,7 @@ public class RoomController {
 
     // works, but there is no Exception handled
     @RequestMapping(value = "/{roomID}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> delete(@PathVariable Integer roomID) { // todo same with res entity
+    public ResponseEntity<?> delete(@PathVariable Integer roomID) {
 
         try {
             roomService.deleteRoomByID(roomID);
@@ -75,12 +75,12 @@ public class RoomController {
     // works
 
     @RequestMapping(method = RequestMethod.POST, path = "/{personID}")
-    public ResponseEntity<?> add(@RequestBody RegisterRoomRequest registerRoomRequest, @PathVariable Integer personID) { // todo resp entity 200
+    public ResponseEntity<?> add(@RequestBody RegisterRoomRequest registerRoomRequest, @PathVariable Integer personID) {
 
-        try{
-            JsonRoomResponse jsonRoomResponse = roomService.registerRoom(registerRoomRequest,personID);
+        try {
+            JsonRoomResponse jsonRoomResponse = roomService.registerRoom(registerRoomRequest, personID);
             return ResponseEntity.ok(jsonRoomResponse);
-        }catch (Exception e){
+        } catch (Exception e) {
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());

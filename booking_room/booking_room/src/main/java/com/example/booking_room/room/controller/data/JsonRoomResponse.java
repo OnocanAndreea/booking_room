@@ -10,7 +10,7 @@ import lombok.Value;
 
 @Value
 @Builder
-@JsonDeserialize(builder =  JsonRoomResponse.JsonRoomResponseBuilder.class)
+@JsonDeserialize(builder = JsonRoomResponse.JsonRoomResponseBuilder.class)
 
 public class JsonRoomResponse {
 
@@ -27,7 +27,7 @@ public class JsonRoomResponse {
     String type;
 
     @NonNull
-    public static JsonRoomResponse toJson(final Room room){
+    public static JsonRoomResponse toJson(final Room room) {
         return JsonRoomResponse.builder()
                 .roomID(room.getRoomID())
                 .numberOfSeats(room.getNumberOfSeats())
@@ -35,6 +35,4 @@ public class JsonRoomResponse {
                 .type(room.getType())
                 .build();
     }
-
-
 }

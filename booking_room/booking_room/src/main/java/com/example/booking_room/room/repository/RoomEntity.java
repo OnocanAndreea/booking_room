@@ -1,6 +1,7 @@
 package com.example.booking_room.room.repository;
 
 import lombok.*;
+
 import javax.persistence.*;
 
 @Builder
@@ -10,21 +11,20 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "room")
-public class RoomEntity{
+public class RoomEntity {
 
-        @Id
-        //aici setam pk din db
-        @GeneratedValue
+    @Id
+    @GeneratedValue
 
-        @Column(name = "room_id")
-        public Integer roomID;
+    @Column(name = "room_id")
+    public Integer roomID;
 
-        @Column(name = "number_of_seats")
-        public Integer numberOfSeats;
+    @Column(name = "number_of_seats")
+    public Integer numberOfSeats;
 
-        @Column(name = "room_address_id")
-        public Integer roomAddressID;
+    @Column(name = "room_address_id")
+    public Integer roomAddressID;
 
-        @Column(name = "type")
-        public String type;
+    @Column(name = "type")
+    public String type;
 }

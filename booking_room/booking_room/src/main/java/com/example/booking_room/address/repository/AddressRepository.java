@@ -1,9 +1,6 @@
 package com.example.booking_room.address.repository;
 
 import com.example.booking_room.address.Address;
-import com.example.booking_room.person.Person;
-import com.example.booking_room.person.repository.PersonEntity;
-import com.example.booking_room.person.repository.PersonRepository;
 import lombok.NonNull;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -13,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManagerFactory;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,24 +27,16 @@ public class AddressRepository {
     }
 
     @NonNull
-    //works
-    public Address create(@NonNull final Address address) // must return a Address
+    public Address create(@NonNull final Address address)
     {
-
-        //am convertit obiectul in entity
         final AddressEntity addressEntity = toEntity(address);
-
 
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
-            //salvez o persoana in db
             final Serializable addressId = session.save(addressEntity);
-            //am adaugat persoana cu succes daca nu e ok intram in catch
             transaction.commit();
-            //de parca am executa un select(verific persoana in db daca o aparut)
             final AddressEntity savedAddressEntity = session.load(AddressEntity.class, addressId);
-            //convertesc entityul in pojo
             return fromEntity(savedAddressEntity);
 
         } catch (Exception e) {
@@ -59,17 +47,12 @@ public class AddressRepository {
         }
     }
 
-    //works
     public Address readByID(Integer addressID) {
 
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
-
             AddressEntity addressEntity = session.get(AddressEntity.class, addressID);
-
-            System.out.println("Getting addressEntity by addressID:" + addressID);
-
             transaction.commit();
 
             return fromEntity(addressEntity);
@@ -83,16 +66,11 @@ public class AddressRepository {
         }
     }
 
-    //works
     public void deleteByID(@NonNull Integer addressID) {
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
         Transaction transaction = null;
         try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
-
             AddressEntity addressEntity = session.load(AddressEntity.class, addressID);
-
-            System.out.println("in delete by id addressentity:" + addressEntity);
 
             if (addressEntity != null) {
                 session.delete(addressEntity);
@@ -106,9 +84,7 @@ public class AddressRepository {
                 transaction.rollback();
                 throw e;
             }
-
         }
-
     }
 
     @NonNull
@@ -117,10 +93,8 @@ public class AddressRepository {
         Session session = null;
         List<AddressEntity> addressEntityList;
         try {
-            // start a transaction
             session = hibernateFactory.openSession();
             transaction = session.beginTransaction();
-            // commit transaction
             addressEntityList = session.createQuery("from AddressEntity", AddressEntity.class).getResultList();
             transaction.commit();
             return addressEntityList
@@ -128,39 +102,32 @@ public class AddressRepository {
                     .map(AddressRepository::fromEntity)
                     .collect(Collectors.toList());
 
-
         } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
-                throw e;
-            }
+
+            }throw e;
 
         } finally {
             if (session != null) {
                 session.close();
             }
         }
-        return null;
     }
 
     @NonNull
-    // this one simply inserts a new address
-    public Address update(@NonNull final Address address) // must return a
-    {
-        System.out.println("in update got address:" + address);
-        // todo: map Address to AddressEntity
-        final AddressEntity addressEntity = toEntity(address);
-        System.out.println("in update addressentity:" + addressEntity);
 
-        // todo: use Hibernate EntityManger or Session to persist the entity in DB
+    public Address update(@NonNull final Address address)
+    {
+        final AddressEntity addressEntity = toEntity(address);
+
         Session session = null;
         Transaction transaction = null;
         try {
             session = hibernateFactory.openSession();
             transaction = session.beginTransaction();
 
-            session.saveOrUpdate(addressEntity); //this way it created a new row
-            //session.update(addressEntity);
+            session.saveOrUpdate(addressEntity);
             transaction.commit();
             return fromEntity(addressEntity);
 
@@ -176,7 +143,7 @@ public class AddressRepository {
         }
     }
 
-    //todo entity to domain object
+
     @NonNull
     public static Address fromEntity(@NonNull final AddressEntity addressEntity) {
         return Address.builder()

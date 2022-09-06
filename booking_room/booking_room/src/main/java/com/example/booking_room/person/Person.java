@@ -8,7 +8,7 @@ import org.springframework.lang.Nullable;
 @Builder
 @Value
 public class  Person {
-    //@NonNull // this way it gives an error: personID is marked non-null but is null
+
     @Nullable
     Integer personID;
     @NonNull

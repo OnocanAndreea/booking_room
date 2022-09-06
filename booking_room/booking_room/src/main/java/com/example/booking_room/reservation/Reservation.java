@@ -7,7 +7,6 @@ import lombok.Value;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Value
 @Builder
@@ -30,6 +29,9 @@ public class Reservation {
 
     @NonNull
     Integer organizerPersonID;
+
+    @Builder.Default
+    Boolean accepted = false;
 
 
 

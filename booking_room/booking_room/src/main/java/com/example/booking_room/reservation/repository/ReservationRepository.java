@@ -1,6 +1,5 @@
 package com.example.booking_room.reservation.repository;
 
-import com.example.booking_room.reservation.CheckDate;
 import com.example.booking_room.reservation.Reservation;
 import lombok.NonNull;
 import org.hibernate.Session;
@@ -33,41 +32,34 @@ public class ReservationRepository {
     //works
     public Reservation create(@NonNull final Reservation reservation) // must return a Reservation
     {
-        //am convertit obiectul in entity
         final ReservationEntity reservationEntity = toEntity(reservation);
-
 
         Transaction transaction = null;
 
-        try ( Session session = hibernateFactory.openSession()){
+        try (Session session = hibernateFactory.openSession()) {
 
             transaction = session.beginTransaction();
-            //verific daca exista deja o rezervare pe camera aia si data aia
 
             Query existingReservationsQuery = session.createQuery("from ReservationEntity where reservedRoomID = :reservedRoomID and arrivalDate >= :arrivalDate" +
                     " and departureDate <= :departureDate");
 
             existingReservationsQuery.setParameter("reservedRoomID", reservation.getReservedRoomID());
-            existingReservationsQuery.setParameter("arrivalDate",reservation.getArrivalDate());
-            existingReservationsQuery.setParameter("departureDate",reservation.getDepartureDate());
+            existingReservationsQuery.setParameter("arrivalDate", reservation.getArrivalDate());
+            existingReservationsQuery.setParameter("departureDate", reservation.getDepartureDate());
 
-            if(reservation.getArrivalDate().isAfter(reservation.getDepartureDate())){
+            if (reservation.getArrivalDate().isAfter(reservation.getDepartureDate())) {
                 throw new RuntimeException("the dates aren't correct");
             }
 
             Reservation existingReservation = (Reservation) existingReservationsQuery.uniqueResult();
 
-            if(existingReservation != null) {
+            if (existingReservation != null) {
                 throw new RuntimeException("This room is already booked for the given date!");
             }
 
-            //salvez o persoana in db
             final Serializable reservationId = session.save(reservationEntity);
-            //am adaugat persoana cu succes daca nu e ok intram in catch
             transaction.commit();
-            //de parca am executa un select(verific persoana in db daca o aparut)
             final ReservationEntity savedReservationEntity = session.load(ReservationEntity.class, reservationId);
-            //convertesc entityul in pojo
             return fromEntity(savedReservationEntity);
 
         } catch (Exception e) {
@@ -111,8 +103,6 @@ public class ReservationRepository {
 
             ReservationEntity reservationEntity = session.load(ReservationEntity.class, reservationID);
 
-            System.out.println("in delete byid reservationentity:" + reservationEntity);
-
             if (reservationEntity != null) {
                 session.delete(reservationEntity);
                 transaction.commit();
@@ -134,12 +124,10 @@ public class ReservationRepository {
     public List<Reservation> readAll() {
 
         Transaction transaction = null;
-        Session session = null;
 
         List<ReservationEntity> reservationEntityList;
-        try {
+        try (Session session = hibernateFactory.openSession()) {
             // start a transaction
-            session = hibernateFactory.openSession();
             transaction = session.beginTransaction();
             // commit transaction
             reservationEntityList = session.createQuery("from ReservationEntity ", ReservationEntity.class).getResultList();
@@ -157,27 +145,16 @@ public class ReservationRepository {
             }
             throw e;
 
-        } finally {
-            if (session != null) {
-                session.close();
-            }
         }
     }
 
     @NonNull
     // this one simply inserts a new reservation
-    public Reservation update(@NonNull final Reservation reservation)
-    {
-        System.out.println("in update got reservation:" + reservation);
-
+    public Reservation update(@NonNull final Reservation reservation) {
         final ReservationEntity reservationEntity = toEntity(reservation);
-        System.out.println("in update reservationentity:" + reservationEntity);
 
-
-        Session session = null;
         Transaction transaction = null;
-        try {
-            session = hibernateFactory.openSession();
+        try (Session session = hibernateFactory.openSession()) {
             transaction = session.beginTransaction();
 
             session.saveOrUpdate(reservationEntity); //this way it created a new row
@@ -190,10 +167,6 @@ public class ReservationRepository {
                 transaction.rollback();
             }
             throw new RuntimeException(e);
-        } finally {
-            if (session != null) {
-                session.close();
-            }
         }
     }
 
@@ -220,5 +193,27 @@ public class ReservationRepository {
                 .reservedRoomID(reservation.getReservedRoomID())
                 .organizerPersonID(reservation.getOrganizerPersonID())
                 .build();
+    }
+
+    public Reservation acceptOrDecline(Integer reservationID, boolean accepted) {
+
+        Transaction transaction = null;
+        try (Session session = hibernateFactory.openSession()) {
+            transaction = session.beginTransaction();
+
+            ReservationEntity reservationEntity = session.load(ReservationEntity.class, reservationID); //this way it created a new row
+            reservationEntity.setAccepted(accepted);
+
+            session.saveOrUpdate(reservationEntity);
+
+            transaction.commit();
+            return fromEntity(reservationEntity);
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw new RuntimeException(e);
+        }
     }
 }

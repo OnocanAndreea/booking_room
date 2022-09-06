@@ -19,7 +19,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,6 +84,13 @@ public class ReservationService {
             return JsonReservationResponse.toJson(reservation);
         } catch (Exception e) {
             throw new RuntimeException("Reservation with id:" + reservationID + " not found!");
+        }
+    }
+    public JsonReservationResponse acceptOrDeclineByID(Integer reservationID,boolean accepted){
+        try{
+            return JsonReservationResponse.toJson(reservationRepository.acceptOrDecline(reservationID,accepted));
+        }catch (Exception e){
+            throw new RuntimeException("nu");
         }
     }
 
@@ -168,24 +177,42 @@ public class ReservationService {
         LocalDate fromDate = LocalDate.parse(checkDate.getFromDate());
         LocalDate toDate = LocalDate.parse(checkDate.getToDate());
 
-        try {
-            List<Reservation> availableRoomListIds = reservationRepository.readAll();
-            List<Integer> collectedReservedRoomID = new ArrayList<>();
-            for (Reservation reservation : availableRoomListIds) {
-                if (reservation.getArrivalDate().compareTo(fromDate) > 0 && reservation.getDepartureDate().compareTo(toDate) < 0) {
-                    collectedReservedRoomID.add(reservation.getReservedRoomID()); //todo availableroomsID return jsonresponse cu roomID
+        try{
+
+            List<Reservation> reservationListIds = reservationRepository.readAll();
+            Set<Integer> collectedReservedRoomID = new HashSet<>();
+            for (Reservation reservation : reservationListIds) {
+
+                if ((fromDate.compareTo(reservation.getDepartureDate()) <= 0) && (toDate.compareTo(reservation.getArrivalDate()) >= 0)) {
+                    collectedReservedRoomID.add(reservation.getReservedRoomID());
                 }
             }
-//            return JsonGetRoomListResponse.builder().rooms(availableRoomListIds
-//                            .stream()
-//                            .map(JsonRoomResponse::getRoomID)
-//                            .collect(Collectors.toList()))
-//                            .build();
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.out.println("reserved rooms"+collectedReservedRoomID);
+            List<Room> allRooms = roomRepository.readAll();
+            List<Room> availRooms = new ArrayList<>();
+            for (Room room : allRooms) {
+                    if ( !collectedReservedRoomID.contains(room.getRoomID())) {
+                        availRooms.add(room);
+                    }
+            }
+
+            List<JsonRoomResponse> jsonAvailableRoom = availRooms
+                    .stream()
+                    .map(room -> JsonRoomResponse.builder().roomID(room.getRoomID())
+                            .roomAddressID(room.getRoomAddressID())
+                            .numberOfSeats(room.getNumberOfSeats())
+                            .type(room.getType())
+                            .build())
+                    .collect(Collectors.toList());
+            return JsonGetRoomListResponse.builder()
+                    .rooms(jsonAvailableRoom)
+                    .build();
+
+
+        }catch (Exception e) {
+            throw new RuntimeException("we don't have available rooms");
         }
-return null;
     }
 }
 

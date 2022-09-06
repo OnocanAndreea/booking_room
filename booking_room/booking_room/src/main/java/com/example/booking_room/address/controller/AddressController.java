@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-//endpoint by default
 @RequestMapping("address")
 public class AddressController {
     @NonNull
@@ -22,14 +21,6 @@ public class AddressController {
         this.addressService = addressService;
     }
 
-    //works
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public void getTest() {
-
-        System.out.println("The test works");
-    }
-
-    //works
     @RequestMapping(value = "/addresses", method = RequestMethod.GET)
     public ResponseEntity<?> getAll() {
         try {
@@ -41,7 +32,6 @@ public class AddressController {
         }
     }
 
-    //works, but there is no Exception handled
     @GetMapping(value = "/{addressID}")
     public ResponseEntity<?> getById(@PathVariable Integer addressID) {
         try {
@@ -53,7 +43,6 @@ public class AddressController {
         }
     }
 
-    // works, but there is no Exception handled
     @RequestMapping(value = "/{addressID}", method = RequestMethod.DELETE)
     public ResponseEntity<?> delete(@PathVariable Integer addressID) { // todo same with res entity
         try {
@@ -65,7 +54,6 @@ public class AddressController {
         }
     }
 
-    // works
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> add(@RequestBody RegisterAddressRequest registerAddressRequest) { // todo resp entity 200
 
@@ -79,7 +67,6 @@ public class AddressController {
 
     }
 
-    // this works
     @PutMapping(value = "/{addressID}")
     public ResponseEntity<?> update(@RequestBody UpdateAddressRequest updateAddressRequest, @PathVariable Integer addressID) {
         System.out.println("Address with addressId:" + addressID + " to update");

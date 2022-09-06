@@ -7,7 +7,7 @@ import org.springframework.lang.Nullable;
 
 @Builder
 @Value
-public class  Room  {
+public class Room {
 
     @Nullable
     Integer roomID;
